@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url(https://www.rtk.lv/img/logo.png);
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 500px;
+            padding: 30px;
+            margin-top: 100px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #428bca;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .button:hover {
+            background-color: #3071a9;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QUIZ GAME</h1>
+        <div id="quiz"></div>
+        <div id="result" class="result"></div>
+        <button id="submit" class="button">Submit</button>
+        <button id="retry" class="button hide">Retry</button>
+        <button id="showAnswer" class="button hide">Show Answer</button>
+        <button id="home" class="button">Home</button>
+    </div>
+    <script>
+        const quizData = [
+            {
+                question: 'Kāda ir Latvijas galvaspilsēta?',
+                options: ['Rīga', 'Tallina', 'Viļņa', 'Varšava'],
+                answer: 'Rīga',
+            },
+            {
+                question: 'Kas ir lielākā planēta Saules sistēmā?',
+                options: ['Marss', 'Saturns', 'Jupiters', 'Neptūns'],
+                answer: 'Jupiters',
+            },
+            {
+                question: 'Kurā gadā Latvija atguva neatkarību?',
+                options: ['1989', '1990', '1991', '1992'],
+                answer: '1991',
+            },
+            {
+                question: 'Kas ir augstākais kalns Latvijā?',
+                options: ['Gaiziņkalns', 'Munameģis', 'Sauleskalns', 'Daugavas krasti'],
+                answer: 'Gaiziņkalns',
+            },
+            {
+                question: 'Kurš ir lielākais ezers Latvijā?',
+                options: [
+                    'Lubāns',
+                    'Rāznas ezers',
+                    'Engures ezers',
+                    'Burtnieks',
+                ],
+                answer: 'Lubāns',
+            },
+            {
+                question: 'Kāda ir ķīmiskā zīme zeltam?',
+                options: ['Au', 'Ag', 'Cu', 'Fe'],
+                answer: 'Au',
+            },
+            {
+                question: 'Kurš gleznoja Monu Lizu?',
+                options: [
+                    'Pablo Pikaso',
+                    'Vincent van Gogs',
+                    'Leonardo da Vinči',
+                    'Mikelandželo',
+                ],
+                answer: 'Leonardo da Vinči',
+            },
+            {
+                question: 'Kura planēta ir pazīstama kā Sarkanā planēta?',
+                options: ['Marss', 'Venēra', 'Merkurs', 'Urāns'],
+                answer: 'Marss',
+            },
+            {
+                question: 'Kura ir lielākā haizivju suga?',
+                options: [
+                    'Lielā balto haizivs',
+                    'Vaļhaizivs',
+                    'Tīģerhaizivs',
+                    'Āmurrūna haizivs',
+                ],
+                answer: 'Vaļhaizivs',
+            },
+            {
+                question: 'Kuru dzīvnieku sauc par Džungļu karali?',
+                options: ['Lauva', 'Tīģeris', 'Zilonis', 'Žirafe'],
+                answer: 'Lauva',
+            },
+        ];
+
+        const quizContainer = document.getElementById('quiz');
+        const resultContainer = document.getElementById('result');
+        const submitButton = document.getElementById('submit');
+        const retryButton = document.getElementById('retry');
+        const showAnswerButton = document.getElementById('showAnswer');
+        const homeButton = document.getElementById('home');
+
+        let currentQuestion = 0;
+        let score = 0;
+        let incorrectAnswers = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function displayQuestion() {
+            const questionData = quizData[currentQuestion];
+
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question';
+            questionElement.innerHTML = questionData.question;
+
+            const optionsElement = document.createElement('div');
+            optionsElement.className = 'options';
+
+            const shuffledOptions = [...questionData.options];
+            shuffleArray(shuffledOptions);
+
+            for (let i = 0; i < shuffledOptions.length; i++) {
+                const option = document.createElement('label');
+                option.className = 'option';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'quiz';
+                radio.value = shuffledOptions[i];
+
+                const optionText = document.createTextNode(shuffledOptions[i]);
+
+                option.appendChild(radio);
+                option.appendChild(optionText);
+                optionsElement.appendChild(option);
+            }
+
+            quizContainer.innerHTML = '';
+            quizContainer.appendChild(questionElement);
+            quizContainer.appendChild(optionsElement);
+        }
+
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="quiz"]:checked');
+            if (selectedOption) {
+                const answer = selectedOption.value;
+                if (answer === quizData[currentQuestion].answer) {
+                    score++;
+                } else {
+                    incorrectAnswers.push({
+                        question: quizData[currentQuestion].question,
+                        incorrectAnswer: answer,
+                        correctAnswer: quizData[currentQuestion].answer,
+                    });
+                }
+                currentQuestion++;
+                selectedOption.checked = false;
+                if (currentQuestion < quizData.length) {
+                    displayQuestion();
+                } else {
+                    displayResult();
+                }
+            }
+        }
+
+        function displayResult() {
+            quizContainer.style.display = 'none';
+            submitButton.style.display = 'none';
+            retryButton.style.display = 'inline-block';
+            showAnswerButton.style.display = 'inline-block';
+            resultContainer.innerHTML = `Jūs ieguvāt ${score} no ${quizData.length} punktiem!`;
+        }
+
+        function retryQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            incorrectAnswers = [];
+            quizContainer.style.display = 'block';
+            submitButton.style.display = 'inline-block';
+            retryButton.style.display = 'none';
+            showAnswerButton.style.display = 'none';
+            resultContainer.innerHTML = '';
+            displayQuestion();
+        }
+
+        function showAnswer() {
+            quizContainer.style.display = 'none';
+            submitButton.style.display = 'none';
+            retryButton.style.display = 'inline-block';
+            showAnswerButton.style.display = 'none';
+
+            let incorrectAnswersHtml = '';
+            for (let i = 0; i < incorrectAnswers.length; i++) {
+                incorrectAnswersHtml += `
+                  <p>
+                    <strong>Jautājums:</strong> ${incorrectAnswers[i].question}<br>
+                    <strong>Jūsu atbilde:</strong> ${incorrectAnswers[i].incorrectAnswer}<br>
+                    <strong>Pareizā atbilde:</strong> ${incorrectAnswers[i].correctAnswer}
+                  </p>
+                `;
+            }
+
+            resultContainer.innerHTML = `
+                <p>Jūs ieguvāt ${score} no ${quizData.length} punktiem!</p>
+                <p>Nepareizās atbildes:</p>
+                ${incorrectAnswersHtml}
+            `;
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        submitButton.addEventListener('click', checkAnswer);
+        retryButton.addEventListener('click', retryQuiz);
+        showAnswerButton.addEventListener('click', showAnswer);
+        homeButton.addEventListener('click', goHome);
+        displayQuestion();
+    </script>
+</body>
+</html>
