@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li button {
+            background-color: #ff4d4d;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        li button:hover {
+            background-color: #cc0000;
+        }
+
+        .category {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .category-header h2 {
+            margin: 0;
+        }
+
+        .task-form {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .task-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+
+        .task-form button {
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            transition: background-color 0.3s;
+        }
+
+        .task-form button:hover {
+            background-color: #218838;
+        }
+
+        .home-button {
+            margin-bottom: 20px;
+        }
+
+        .home-button a {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .home-button a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="home-button">
+            <a href="index.html">Home</a>
+        </div>
+        <h1>To-Do List</h1>
+        <form id="category-form">
+            <input type="text" id="category-input" placeholder="Enter a new category" required>
+            <button type="submit" class="btn">Add Category</button>
+        </form>
+        <div id="categories-container"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryForm = document.getElementById('category-form');
+            const categoryInput = document.getElementById('category-input');
+            const categoriesContainer = document.getElementById('categories-container');
+
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+
+            function saveCategories() {
+                localStorage.setItem('categories', JSON.stringify(categories));
+            }
+
+            // Function to render tasks
+            function renderTasks(tasks, taskListElement) {
+                taskListElement.innerHTML = '';
+                tasks.forEach((task, taskIndex) => {
+                    const li = document.createElement('li');
+                    li.textContent = task;
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => {
+                        tasks.splice(taskIndex, 1);
+                        saveCategories();
+                        renderCategories();
+                    });
+                    li.appendChild(deleteButton);
+                    taskListElement.appendChild(li);
+                });
+            }
+
+            function renderCategories() {
+                categoriesContainer.innerHTML = '';
+                categories.forEach((category, categoryIndex) => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.classList.add('category');
+
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.classList.add('category-header');
+
+                    const categoryTitle = document.createElement('h2');
+                    categoryTitle.textContent = category.title;
+                    categoryHeader.appendChild(categoryTitle);
+
+                    const deleteCategoryButton = document.createElement('button');
+                    deleteCategoryButton.textContent = 'Delete Category';
+                    deleteCategoryButton.addEventListener('click', () => {
+                        categories.splice(categoryIndex, 1);
+                        saveCategories();
+                        renderCategories();
+                    });
+                    categoryHeader.appendChild(deleteCategoryButton);
+
+                    categoryDiv.appendChild(categoryHeader);
+
+                    const taskForm = document.createElement('form');
+                    taskForm.classList.add('task-form');
+                    const taskInput = document.createElement('input');
+                    taskInput.type = 'text';
+                    taskInput.placeholder = 'Enter a new task';
+                    taskInput.required = true;
+                    const addTaskButton = document.createElement('button');
+                    addTaskButton.type = 'submit';
+                    addTaskButton.classList.add('btn');
+                    addTaskButton.textContent = 'Add Task';
+                    taskForm.appendChild(taskInput);
+                    taskForm.appendChild(addTaskButton);
+
+                    taskForm.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const task = taskInput.value.trim();
+                        if (task) {
+                            category.tasks.push(task);
+                            taskInput.value = '';
+                            saveCategories();
+                            renderCategories();
+                        }
+                    });
+
+                    categoryDiv.appendChild(taskForm);
+
+                    const taskList = document.createElement('ul');
+                    renderTasks(category.tasks, taskList);
+                    categoryDiv.appendChild(taskList);
+
+                    categoriesContainer.appendChild(categoryDiv);
+                });
+            }
+
+            categoryForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const category = categoryInput.value.trim();
+                if (category) {
+                    categories.push({ title: category, tasks: [] });
+                    categoryInput.value = '';
+                    saveCategories();
+                    renderCategories();
+                }
+            });
+
+            renderCategories();
+        });
+    </script>
+</body>
+</html>
